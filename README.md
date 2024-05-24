@@ -16,5 +16,4 @@ You also need to have LM studio installed to make infernece.
 
 ## Demo
 
-
-
+"C:\Users\Shubham\Videos\VideoDemo.mp4"
