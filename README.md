@@ -12,6 +12,7 @@ To run this project :
 streamlit run main.py
 ```
 
-You also need to have LM studio installed to make infernece.
+You also need to have LM studio installed to make infernece with Llama 3 model installed.
+
 
 
