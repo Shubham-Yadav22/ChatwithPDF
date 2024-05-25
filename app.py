@@ -1,7 +1,8 @@
 import streamlit as st
 import pickle
 import os
-from PyPDF2 import PdfReader  
+from PyPDF2 import PdfReader  # type: ignore
+from streamlit_extras.add_vertical_space import add_vertical_space
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from sentence_transformers import SentenceTransformer
@@ -19,7 +20,6 @@ with st.sidebar:
     - [llama 3](https://huggingface.co/docs/transformers/main/en/model_doc/llama3) LLM model
     - [LM Studio](https://lmstudio.ai/)
     ''')
-
 
 def main():
     st.header("Chat with your PDF 💡")
@@ -71,16 +71,21 @@ def main():
         if submit_button and query:
             # Perform similarity search
             docs = st.session_state['vector_store'].similarity_search(query=query)
+            context = "\n".join([doc.page_content for doc in docs])
 
             # Point to the local server
             client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
+            # Add the context from the PDF to the query
+            messages = [
+                {"role": "system", "content": "Use the provided context to answer the question in brief but make it understandable."},
+                {"role": "assistant", "content": f"Context:\n{context}"},
+                {"role": "user", "content": query}
+            ]
+
             completion = client.chat.completions.create(
                 model="lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF",
-                messages=[
-                    {"role": "system", "content": "Answer in brief but make it understandable."},
-                    {"role": "user", "content": query}
-                ],
+                messages=messages,
                 temperature=0.7,
             )
 
@@ -96,7 +101,6 @@ def main():
                 st.write(f"**You:** {message['content']}")
             else:
                 st.write(f"**Assistant:** {message['content']}")
-
 
 if __name__ == "__main__":
     main()
